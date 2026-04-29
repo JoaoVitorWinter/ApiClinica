@@ -90,6 +90,8 @@ public class MedicosController : ControllerBase
 
         await _context.SaveChangesAsync();
 
+        //ADICIONAR VALIDAÇÃO PARA VER SE O MÉDICO ESTÁ ASSOCIADO A ALGUM AGENDAMENTO, CASO ESTEJA, NÃO PERMITIR A EXCLUSÃO
+
         var medicoDTO = MedicoMapper.ToDTO(medico);
         return Ok(medicoDTO);
     }

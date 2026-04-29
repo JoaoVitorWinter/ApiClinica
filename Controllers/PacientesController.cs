@@ -110,4 +110,23 @@ public class PacientesController : ControllerBase
         return Ok(pacienteDTO);
     }
 
+    // DELETE: api/pacientes/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePaciente(int id)
+    {
+        var paciente = await _context.Pacientes.FindAsync(id);
+
+        if (paciente == null)
+            return NotFound();
+
+        _context.Pacientes.Remove(paciente);
+
+        await _context.SaveChangesAsync();
+
+        //ADICIONAR VALIDAÇÃO PARA VER SE O PACIENTE TEM CONSULTAS FUTURAS AGENDADAS, CASO TENHA, NÃO PERMITIR A EXCLUSÃO
+
+        var pacienteDTO = PacienteMapper.ToDTO(paciente);
+        return Ok(pacienteDTO);
+    }
+
 }
