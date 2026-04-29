@@ -67,6 +67,7 @@ public class PacientesController : ControllerBase
         return CreatedAtAction(nameof(GetPacienteById), new { id = paciente.Id }, pacienteDTO);
     }
 
+    // PATCH: api/pacientes/{id}
     [HttpPatch("{id}")]
     public async Task<IActionResult> UpdatePaciente(int id, [FromBody] PacienteUpdateDTO dto)
     {
