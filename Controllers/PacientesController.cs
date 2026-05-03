@@ -66,4 +66,60 @@ public class PacientesController : ControllerBase
 
         return CreatedAtAction(nameof(GetPacienteById), new { id = paciente.Id }, pacienteDTO);
     }
+
+    // PATCH: api/pacientes
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> UpdatePaciente(int id, [FromBody] PacienteUpdateDTO dto)
+    {
+        var paciente = await _context.Pacientes.FindAsync(id);
+
+        if (paciente == null)
+            return NotFound();
+
+        if (dto.DataNasc != null)
+        {
+            if (dto.DataNasc > DateOnly.FromDateTime(DateTime.Today))
+            {
+                return BadRequest(new { mensagem = "Data de nascimento não pode ser futura." });
+            }
+            else
+            {
+                paciente.DataNasc = dto.DataNasc;
+            }
+        }
+
+        if (dto.Nome != null)
+        {
+            paciente.Nome = dto.Nome;
+        }
+        if (dto.Email != null)
+        {
+            paciente.Email = dto.Email;
+        }
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // DELETE: api/pacientes
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePacienteById(int id)
+    {
+        var paciente = await _context.Pacientes.FindAsync(id);
+
+        if (paciente == null)
+            return NotFound();
+
+        var dataAtual = DateTime.Now;
+
+        var possuiConsultas = await _context.Consultas.AnyAsync(consulta => consulta.PacienteId == id && consulta.DataHora > dataAtual);
+        if (possuiConsultas)
+        {
+            return BadRequest(new { mensagem = "O paciente possui consultas marcadas, e não pode ser removido." });
+        }
+        
+        _context.Pacientes.Remove(paciente);
+        await _context.SaveChangesAsync();
+        return NoContent();
+         
+    }
 }
