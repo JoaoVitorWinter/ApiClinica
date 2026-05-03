@@ -96,6 +96,10 @@ public class PacientesController : ControllerBase
         {
             paciente.Email = dto.Email;
         }
+        if (dto.Telefone != null)
+        {
+            paciente.Telefone = dto.Telefone;
+        }
         await _context.SaveChangesAsync();
         return NoContent();
     }
