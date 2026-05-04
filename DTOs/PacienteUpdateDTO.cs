@@ -2,9 +2,8 @@ namespace ApiClinica.DTOs;
 
 public class PacienteUpdateDTO
 {
-    public int Id { get; set; }
-    public string Nome { get; set; } = default!;
-    public string Email { get; set; } = default!;
-    public string Telefone { get; set; } = default!;
-    public DateOnly DataNasc { get; set; }
+    public string? Nome { get; set; }
+    public string? Email { get; set; }
+    public string? Telefone { get; set; }
+    public DateOnly? DataNasc { get; set; }
 }

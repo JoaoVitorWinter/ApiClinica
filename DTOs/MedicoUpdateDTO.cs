@@ -6,7 +6,6 @@ namespace ApiClinica.DTOs;
 public class MedicoUpdateDTO
 {
     public string? Nome { get; set; }
-
     [EmailAddress(ErrorMessage = "Email inválido")]
     public string? Email { get; set; }
     [Phone(ErrorMessage = "Telefone inválido")]

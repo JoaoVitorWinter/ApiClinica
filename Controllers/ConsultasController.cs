@@ -47,12 +47,6 @@ public class ConsultasController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateConsulta([FromBody] ConsultaCreateDTO dto)
     {
-
-        if (dto.DataHora < DateTime.Now)
-        {
-            return BadRequest(new { mensagem = "Data e hora da consulta não podem ser no passado" });
-        }
-
         var paciente = await _context.Pacientes.FindAsync(dto.PacienteId);
 
         if (paciente == null)
@@ -65,6 +59,11 @@ public class ConsultasController : ControllerBase
         if (medico == null)
         {
             return BadRequest(new { mensagem = "Médico com o ID informado não existe" });
+        }
+
+        if (dto.DataHora < DateTime.Now)
+        {
+            return BadRequest(new { mensagem = "Data e hora da consulta não podem ser no passado" });
         }
 
         var DataHoraInicio = dto.DataHora;
@@ -103,7 +102,7 @@ public class ConsultasController : ControllerBase
             return NotFound();
         }
 
-        if (dto.DataHora != null)
+        if (dto.DataHora.HasValue)
         {
             if (dto.DataHora < DateTime.Now)
             {
@@ -127,7 +126,7 @@ public class ConsultasController : ControllerBase
             consulta.DataHora = dto.DataHora.Value;
         }
 
-        if (dto.PacienteId != null)
+        if (dto.PacienteId.HasValue)
         {
             var paciente = await _context.Pacientes.FindAsync(dto.PacienteId);
 
@@ -137,10 +136,10 @@ public class ConsultasController : ControllerBase
             }
 
             // AQUI EU NAO SEI
-            consulta.paciente = paciente;
+            consulta.Paciente = paciente;
         }
 
-        if (dto.MedicoId != null)
+        if (dto.MedicoId.HasValue)
         {
             var medico = await _context.Medicos.FindAsync(dto.MedicoId);
 
@@ -150,10 +149,8 @@ public class ConsultasController : ControllerBase
             }
 
             // AQUI TAMBÉM NÃO
-            consulta.medico = medico;
+            consulta.Medico = medico;
         }
-
-        
 
         await _context.SaveChangesAsync();
 
@@ -174,7 +171,6 @@ public class ConsultasController : ControllerBase
         _context.Consultas.Remove(consulta);
 
         await _context.SaveChangesAsync();
-
 
         var consultaDTO = ConsultaMapper.ToDTO(consulta);
         return Ok(consultaDTO);

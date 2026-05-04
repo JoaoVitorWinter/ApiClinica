@@ -66,13 +66,28 @@ public class MedicosController : ControllerBase
         if (medico == null)
             return NotFound();
 
-        if (dto.Nome != null) medico.Nome = dto.Nome;
-        if (dto.Email != null) medico.Email = dto.Email;
-        if (dto.Telefone != null) medico.Telefone = dto.Telefone;
-        if (dto.CRM != null) medico.CRM = dto.CRM;
+        if (!string.IsNullOrWhiteSpace(dto.Nome))
+        {
+            medico.Nome = dto.Nome;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Email))
+        {
+            medico.Email = dto.Email;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Telefone))
+        {
+            medico.Telefone = dto.Telefone;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.CRM))
+        {
+            medico.CRM = dto.CRM;
+        }
 
         await _context.SaveChangesAsync();
-
+        
         var medicoDTO = MedicoMapper.ToDTO(medico);
         return Ok(medicoDTO);
     }
@@ -85,6 +100,14 @@ public class MedicosController : ControllerBase
 
         if (medico == null)
             return NotFound();
+
+        var dataAtual = DateTime.Now;
+
+        var possuiConsultas = await _context.Consultas.AnyAsync(consulta => consulta.MedicoId == id && consulta.DataHora > dataAtual);
+        if (possuiConsultas)
+        {
+            return BadRequest(new { mensagem = "O médico possui consultas marcadas, e não pode ser removido." });
+        }
 
         _context.Medicos.Remove(medico);
 

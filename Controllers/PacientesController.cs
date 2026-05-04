@@ -148,7 +148,7 @@ public class PacientesController : ControllerBase
         if (paciente == null)
             return NotFound();
 
-        if (dto.DataNasc != null)
+        if (dto.DataNasc.HasValue)
         {
             if (dto.DataNasc > DateOnly.FromDateTime(DateTime.Today))
             {
@@ -160,20 +160,25 @@ public class PacientesController : ControllerBase
             }
         }
 
-        if (dto.Nome != null)
+        if (!string.IsNullOrWhiteSpace(dto.Nome))
         {
             paciente.Nome = dto.Nome;
         }
-        if (dto.Email != null)
+
+        if (!string.IsNullOrWhiteSpace(dto.Email))
         {
             paciente.Email = dto.Email;
         }
-        if (dto.Telefone != null)
+
+        if (!string.IsNullOrWhiteSpace(dto.Telefone))
         {
             paciente.Telefone = dto.Telefone;
         }
+
         await _context.SaveChangesAsync();
-        return NoContent();
+
+        var pacienteDTO = PacienteMapper.ToDTO(paciente);
+        return Ok(pacienteDTO);
     }
 
     // DELETE: api/pacientes
@@ -195,7 +200,8 @@ public class PacientesController : ControllerBase
         
         _context.Pacientes.Remove(paciente);
         await _context.SaveChangesAsync();
-        return NoContent();
-         
+
+        var pacienteDTO = PacienteMapper.ToDTO(paciente);
+        return Ok(pacienteDTO);
     }
 }

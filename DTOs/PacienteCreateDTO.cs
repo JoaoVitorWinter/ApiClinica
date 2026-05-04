@@ -6,7 +6,6 @@ namespace ApiClinica.DTOs;
 public class PacienteCreateDTO
 {
     public required string Nome { get; set; }
-
     [EmailAddress(ErrorMessage = "Email inválido")]
     public required string Email { get; set; }
     [Phone(ErrorMessage = "Telefone inválido")]
