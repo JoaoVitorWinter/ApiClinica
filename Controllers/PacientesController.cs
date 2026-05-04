@@ -18,6 +18,73 @@ public class PacientesController : ControllerBase
         _context = context;
     }
 
+    #region Verificar CPF
+
+    private static bool ValidarCPF(string cpf)
+    {
+        // Formatando CPF
+        cpf = cpf.Replace(".", "").Replace("-", "").Replace(" ", "").Trim();
+        // Separando numeros do CPF
+        char[] cpfParts = cpf.ToCharArray();
+        if (cpfParts.Length != 11) return false;
+
+        // (Primeiro número * 10) + (segundo número * 9) + (terceiro número * 8)...
+        int charSoma = 0;
+        for (int charIndex = 0; charIndex <= 8; charIndex++)
+        {
+            int intValue = 0;
+            if (!int.TryParse(cpfParts[charIndex].ToString(), out intValue)) {
+                return false;
+            }
+
+            charSoma += (intValue * (10 - charIndex));
+        }
+
+        // Calculando primeiro dígito verificador necessário
+        int restoDivisao = charSoma % 11;
+        int digitoVerificador1Necessario = 0;
+        if (restoDivisao > 1) digitoVerificador1Necessario = 11 - restoDivisao;
+
+        // (Segundo número * 10) + (terceiro número * 9) + (quarto número * 8)...
+        charSoma = 0;
+        for (int charIndex = 1; charIndex <= 9; charIndex++)
+        {
+            // Para o último número na conta (que seria o primeiro dígito verificador), usa o necessário ao invés do recebido
+            if (charIndex == 9)
+            {
+                charSoma += (digitoVerificador1Necessario * (10 - (charIndex - 1)));
+                continue;
+            }
+
+            int intValue = 0;
+            if (!int.TryParse(cpfParts[charIndex].ToString(), out intValue))
+            {
+                return false;
+            }
+
+            charSoma += (intValue * (10 - (charIndex - 1)));
+        }
+
+        // Calculando segundo dígito verificador necessário
+        restoDivisao = charSoma % 11;
+        int digitoVerificador2Necessario = 0;
+        if (restoDivisao > 1) digitoVerificador2Necessario = 11 - restoDivisao;
+
+        // Buscando dígitos verificadores recebidos
+        int digitoVerificador1 = 0;
+        int digitoVerificador2 = 0;
+        if (!int.TryParse(cpfParts[9].ToString(), out digitoVerificador1)) return false;
+        if (!int.TryParse(cpfParts[10].ToString(), out digitoVerificador2)) return false;
+
+        // Verificando dígitos verificadores
+        if (digitoVerificador1 != digitoVerificador1Necessario) return false;
+        if (digitoVerificador2 != digitoVerificador2Necessario) return false;
+
+        return true;
+    }
+
+    #endregion
+
     // GET: api/pacientes
     [HttpGet]
     public async Task<IActionResult> GetPacientes()
@@ -55,6 +122,11 @@ public class PacientesController : ControllerBase
         if (await _context.Pacientes.AnyAsync(p => p.Cpf == dto.Cpf))
         {
             return BadRequest(new { mensagem = "Usuário com o CPF informado já existe" });
+        }
+
+        if (!ValidarCPF(dto.Cpf))
+        {
+            return BadRequest(new { mensagem = "O CPF é inválido" });
         }
 
         var paciente = PacienteMapper.ToModel(dto);
