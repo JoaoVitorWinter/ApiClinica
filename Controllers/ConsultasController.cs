@@ -136,7 +136,7 @@ public class ConsultasController : ControllerBase
             }
 
             // AQUI EU NAO SEI
-            consulta.Paciente = paciente;
+            consulta.paciente = paciente;
         }
 
         if (dto.MedicoId.HasValue)
@@ -149,7 +149,7 @@ public class ConsultasController : ControllerBase
             }
 
             // AQUI TAMBÉM NÃO
-            consulta.Medico = medico;
+            consulta.medico = medico;
         }
 
         await _context.SaveChangesAsync();

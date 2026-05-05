@@ -156,7 +156,7 @@ public class PacientesController : ControllerBase
             }
             else
             {
-                paciente.DataNasc = dto.DataNasc;
+                paciente.DataNasc = dto.DataNasc.Value;
             }
         }
 
