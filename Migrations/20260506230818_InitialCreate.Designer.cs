@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiClinica.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260424232715_FullCreate")]
-    partial class FullCreate
+    [Migration("20260506230818_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
             modelBuilder.Entity("ApiClinica.Models.Consulta", b =>
                 {
