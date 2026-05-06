@@ -11,5 +11,7 @@ public class PacienteCreateDTO
     [Phone(ErrorMessage = "Telefone inválido")]
     public required string Telefone { get; set; }
     public required DateOnly DataNasc { get; set; }
+    [RegularExpression(@"^(?:\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2})$",
+        ErrorMessage = "CPF deve estar no formato 11111111111 ou 111.111.111-11")]
     public required string Cpf { get; set; }
 }
