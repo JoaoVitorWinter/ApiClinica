@@ -22,8 +22,6 @@ public class PacientesController : ControllerBase
 
     private static bool ValidarCPF(string cpf)
     {
-        // Formatando CPF
-        cpf = cpf.Replace(".", "").Replace("-", "").Replace(" ", "").Trim();
         // Separando numeros do CPF
         char[] cpfParts = cpf.ToCharArray();
         if (cpfParts.Length != 11) return false;
@@ -119,10 +117,13 @@ public class PacientesController : ControllerBase
             return BadRequest(new { mensagem = "Data de nascimento não pode ser futura." });
         }
 
+        
+        dto.Cpf = dto.Cpf.Replace(".", "").Replace("-", "").Trim();
         if (await _context.Pacientes.AnyAsync(p => p.Cpf == dto.Cpf))
         {
             return BadRequest(new { mensagem = "Usuário com o CPF informado já existe" });
         }
+
 
         if (!ValidarCPF(dto.Cpf))
         {
