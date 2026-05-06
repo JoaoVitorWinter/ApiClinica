@@ -85,9 +85,6 @@ public class ConsultasController : ControllerBase
         _context.Consultas.Add(consulta);
         await _context.SaveChangesAsync();
 
-        consulta.medico = medico;
-        consulta.paciente = paciente;
-
         var consultaDTO = ConsultaMapper.ToDTO(consulta);
 
         return CreatedAtAction(nameof(GetConsultaById), new { id = consulta.Id }, consultaDTO);

@@ -21,9 +21,7 @@ public static class ConsultaMapper
         {
             Id = consulta.Id,
             PacienteId = consulta.PacienteId,
-            paciente = consulta.paciente,
             MedicoId = consulta.MedicoId,
-            medico = consulta.medico,
             DataHora = consulta.DataHora
         };
     }
