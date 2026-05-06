@@ -85,6 +85,9 @@ public class ConsultasController : ControllerBase
         _context.Consultas.Add(consulta);
         await _context.SaveChangesAsync();
 
+        consulta.medico = medico;
+        consulta.paciente = paciente;
+
         var consultaDTO = ConsultaMapper.ToDTO(consulta);
 
         return CreatedAtAction(nameof(GetConsultaById), new { id = consulta.Id }, consultaDTO);
@@ -135,7 +138,6 @@ public class ConsultasController : ControllerBase
                 return BadRequest(new { mensagem = "Paciente com o ID informado não existe" });
             }
 
-            // AQUI EU NAO SEI
             consulta.paciente = paciente;
         }
 
@@ -148,7 +150,6 @@ public class ConsultasController : ControllerBase
                 return BadRequest(new { mensagem = "Médico com o ID informado não existe" });
             }
 
-            // AQUI TAMBÉM NÃO
             consulta.medico = medico;
         }
 
