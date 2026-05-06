@@ -26,6 +26,15 @@ public class PacientesController : ControllerBase
         char[] cpfParts = cpf.ToCharArray();
         if (cpfParts.Length != 11) return false;
 
+        // Se números forem todos iguais, CPF também é inválido (ex: 111.111.111-11)
+        bool numerosTodosIguais = true;
+        char ultimoCaractere = cpfParts[0];
+        foreach (char caractereAtual in cpfParts)
+        {
+            if (caractereAtual != ultimoCaractere) numerosTodosIguais = false;
+        }
+        if (numerosTodosIguais == true) return false;
+
         // (Primeiro número * 10) + (segundo número * 9) + (terceiro número * 8)...
         int charSoma = 0;
         for (int charIndex = 0; charIndex <= 8; charIndex++)
