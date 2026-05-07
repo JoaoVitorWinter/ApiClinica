@@ -35,7 +35,7 @@ public class PacientesController : ControllerBase
         }
         if (numerosTodosIguais == true) return false;
 
-        // (Primeiro número * 10) + (segundo número * 9) + (terceiro número * 8)...
+        // (Primeiro número * 10) + (segundo número * 9) + (terceiro número * 8) ... (nono número * 2)
         int charSoma = 0;
         for (int charIndex = 0; charIndex <= 8; charIndex++)
         {
@@ -52,7 +52,7 @@ public class PacientesController : ControllerBase
         int digitoVerificador1Necessario = 0;
         if (restoDivisao > 1) digitoVerificador1Necessario = 11 - restoDivisao;
 
-        // (Segundo número * 10) + (terceiro número * 9) + (quarto número * 8)...
+        // (Segundo número * 10) + (terceiro número * 9) + (quarto número * 8) ... (décimo número * 2)
         charSoma = 0;
         for (int charIndex = 1; charIndex <= 9; charIndex++)
         {
