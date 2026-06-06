@@ -4,11 +4,13 @@ using ApiClinica.Data;
 using Microsoft.EntityFrameworkCore;
 using ApiClinica.DTOs;
 using ApiClinica.Mappers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ApiClinica.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ConsultasController : ControllerBase
 {
     private readonly AppDbContext _context;

@@ -1,217 +1,96 @@
 using Microsoft.AspNetCore.Mvc;
-using ApiClinica.Models;
-using ApiClinica.Data;
-using Microsoft.EntityFrameworkCore;
 using ApiClinica.DTOs;
-using ApiClinica.Mappers;
+using ApiClinica.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using ApiClinica.Services.Exceptions;
 
 namespace ApiClinica.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class PacientesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IPacienteService _service;
 
-    public PacientesController(AppDbContext context)
+    public PacientesController(IPacienteService service)
     {
-        _context = context;
+        _service = service;
     }
-
-    #region Verificar CPF
-
-    private static bool ValidarCPF(string cpf)
-    {
-        // Separando numeros do CPF
-        char[] cpfParts = cpf.ToCharArray();
-        if (cpfParts.Length != 11) return false;
-
-        // Se números forem todos iguais, CPF também é inválido (ex: 111.111.111-11)
-        bool numerosTodosIguais = true;
-        char ultimoCaractere = cpfParts[0];
-        foreach (char caractereAtual in cpfParts)
-        {
-            if (caractereAtual != ultimoCaractere) numerosTodosIguais = false;
-        }
-        if (numerosTodosIguais == true) return false;
-
-        // (Primeiro número * 10) + (segundo número * 9) + (terceiro número * 8) ... (nono número * 2)
-        int charSoma = 0;
-        for (int charIndex = 0; charIndex <= 8; charIndex++)
-        {
-            int intValue = 0;
-            if (!int.TryParse(cpfParts[charIndex].ToString(), out intValue)) {
-                return false;
-            }
-
-            charSoma += (intValue * (10 - charIndex));
-        }
-
-        // Calculando primeiro dígito verificador necessário
-        int restoDivisao = charSoma % 11;
-        int digitoVerificador1Necessario = 0;
-        if (restoDivisao > 1) digitoVerificador1Necessario = 11 - restoDivisao;
-
-        // (Segundo número * 10) + (terceiro número * 9) + (quarto número * 8) ... (décimo número * 2)
-        charSoma = 0;
-        for (int charIndex = 1; charIndex <= 9; charIndex++)
-        {
-            // Para o último número na conta (que seria o primeiro dígito verificador), usa o necessário ao invés do recebido
-            if (charIndex == 9)
-            {
-                charSoma += (digitoVerificador1Necessario * (10 - (charIndex - 1)));
-                continue;
-            }
-
-            int intValue = 0;
-            if (!int.TryParse(cpfParts[charIndex].ToString(), out intValue))
-            {
-                return false;
-            }
-
-            charSoma += (intValue * (10 - (charIndex - 1)));
-        }
-
-        // Calculando segundo dígito verificador necessário
-        restoDivisao = charSoma % 11;
-        int digitoVerificador2Necessario = 0;
-        if (restoDivisao > 1) digitoVerificador2Necessario = 11 - restoDivisao;
-
-        // Buscando dígitos verificadores recebidos
-        int digitoVerificador1 = 0;
-        int digitoVerificador2 = 0;
-        if (!int.TryParse(cpfParts[9].ToString(), out digitoVerificador1)) return false;
-        if (!int.TryParse(cpfParts[10].ToString(), out digitoVerificador2)) return false;
-
-        // Verificando dígitos verificadores
-        if (digitoVerificador1 != digitoVerificador1Necessario) return false;
-        if (digitoVerificador2 != digitoVerificador2Necessario) return false;
-
-        return true;
-    }
-
-    #endregion
 
     // GET: api/pacientes
     [HttpGet]
     public async Task<IActionResult> GetPacientes()
     {
-        var pacientes = await _context.Pacientes.ToListAsync();
-
-        var pacientesDTO = pacientes
-            .Select(p => PacienteMapper.ToDTO(p))
-            .ToList();
-
-        return Ok(pacientesDTO);
+        var pacientes = await _service.GetPacientes();
+        return Ok(pacientes);
     }
 
     // GET: api/pacientes/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPacienteById(int id)
     {
-        var paciente = await _context.Pacientes.FindAsync(id);
-
-        if (paciente == null)
+        try
+        {
+            var paciente = await _service.GetPacienteById(id);
+            return Ok(paciente);
+        }
+        catch (NotFoundException)
+        {
             return NotFound();
-
-        return Ok(PacienteMapper.ToDTO(paciente));
+        }
     }
 
     // POST: api/pacientes
     [HttpPost]
-    public async Task<IActionResult> CreatePacient([FromBody] PacienteCreateDTO dto)
+    public async Task<IActionResult> CreatePaciente([FromBody] PacienteCreateDTO dto)
     {
-        if (dto.DataNasc > DateOnly.FromDateTime(DateTime.Today))
+        try
         {
-            return BadRequest(new { mensagem = "Data de nascimento não pode ser futura." });
+            var paciente = await _service.CreatePaciente(dto);
+            return Created(nameof(GetPacienteById), paciente);
         }
-
-        
-        dto.Cpf = dto.Cpf.Replace(".", "").Replace("-", "").Trim();
-        if (await _context.Pacientes.AnyAsync(p => p.Cpf == dto.Cpf))
+        catch (ValidationErrorException ex)
         {
-            return BadRequest(new { mensagem = "Usuário com o CPF informado já existe" });
+            return BadRequest(new { mensagem = ex.Message });
         }
-
-
-        if (!ValidarCPF(dto.Cpf))
-        {
-            return BadRequest(new { mensagem = "O CPF é inválido" });
-        }
-
-        var paciente = PacienteMapper.ToModel(dto);
-        
-        _context.Pacientes.Add(paciente);
-        await _context.SaveChangesAsync();
-
-        var pacienteDTO = PacienteMapper.ToDTO(paciente);
-
-        return CreatedAtAction(nameof(GetPacienteById), new { id = paciente.Id }, pacienteDTO);
     }
 
     // PATCH: api/pacientes
     [HttpPatch("{id}")]
     public async Task<IActionResult> UpdatePaciente(int id, [FromBody] PacienteUpdateDTO dto)
     {
-        var paciente = await _context.Pacientes.FindAsync(id);
-
-        if (paciente == null)
+        try
+        {
+            var paciente = await _service.UpdatePaciente(id, dto);
+            return Ok(paciente);
+        }
+        catch (NotFoundException)
+        {
             return NotFound();
-
-        if (dto.DataNasc.HasValue)
-        {
-            if (dto.DataNasc > DateOnly.FromDateTime(DateTime.Today))
-            {
-                return BadRequest(new { mensagem = "Data de nascimento não pode ser futura." });
-            }
-            else
-            {
-                paciente.DataNasc = dto.DataNasc.Value;
-            }
         }
-
-        if (!string.IsNullOrWhiteSpace(dto.Nome))
+        catch (ValidationErrorException ex)
         {
-            paciente.Nome = dto.Nome;
+            return BadRequest(new { mensagem = ex.Message });
         }
-
-        if (!string.IsNullOrWhiteSpace(dto.Email))
-        {
-            paciente.Email = dto.Email;
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Telefone))
-        {
-            paciente.Telefone = dto.Telefone;
-        }
-
-        await _context.SaveChangesAsync();
-
-        var pacienteDTO = PacienteMapper.ToDTO(paciente);
-        return Ok(pacienteDTO);
     }
 
     // DELETE: api/pacientes
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePacienteById(int id)
     {
-        var paciente = await _context.Pacientes.FindAsync(id);
-
-        if (paciente == null)
-            return NotFound();
-
-        var dataAtual = DateTime.Now;
-
-        var possuiConsultas = await _context.Consultas.AnyAsync(consulta => consulta.PacienteId == id && consulta.DataHora > dataAtual);
-        if (possuiConsultas)
+        try
         {
-            return BadRequest(new { mensagem = "O paciente possui consultas marcadas, e não pode ser removido." });
+            var paciente = await _service.DeletePacienteById(id);
+            return Ok(paciente);
         }
-        
-        _context.Pacientes.Remove(paciente);
-        await _context.SaveChangesAsync();
-
-        var pacienteDTO = PacienteMapper.ToDTO(paciente);
-        return Ok(pacienteDTO);
+        catch (NotFoundException)
+        {
+            return NotFound();
+        }
+        catch (ValidationErrorException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 }
