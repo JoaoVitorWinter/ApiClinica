@@ -19,6 +19,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IPacienteMapper, PacienteMapper>();
 builder.Services.AddScoped<IPacienteService, PacientesService>();
 
+builder.Services.AddScoped<IMedicoMapper, MedicoMapper>();
+builder.Services.AddScoped<IMedicoService, MedicosService>();
+
+builder.Services.AddScoped<IConsultaMapper, ConsultaMapper>();
+builder.Services.AddScoped<IConsultaService, ConsultasService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 var jwtKey = builder.Configuration["Jwt:Key"];
 
 // Adicionando autenticação

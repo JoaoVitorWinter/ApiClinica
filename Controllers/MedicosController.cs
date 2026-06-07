@@ -6,6 +6,8 @@ using ApiClinica.DTOs;
 using ApiClinica.Mappers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
+using ApiClinica.Interfaces;
+using ApiClinica.Services.Exceptions;
 
 namespace ApiClinica.Controllers;
 
@@ -15,107 +17,87 @@ namespace ApiClinica.Controllers;
 public class MedicosController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IMedicoService _service;
 
-    public MedicosController(AppDbContext context)
+    public MedicosController(AppDbContext context, IMedicoService service)
     {
         _context = context;
+        _service = service;
     }
 
     // GET: api/medicos
     [HttpGet]
     public async Task<IActionResult> GetMedicos()
     {
-        var medicos = await _context.Medicos.ToListAsync();
-        var medicosDTO = medicos
-            .Select(p => MedicoMapper.ToDTO(p))
-            .ToList();
-
-        return Ok(medicosDTO);
+        var medicos = await _service.GetMedicos();
+        return Ok(medicos);
     }
 
     // GET: api/medicos/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMedicoById(int id)
     {
-        var medico = await _context.Medicos.FindAsync(id);
-
-        if (medico == null)
+        try
+        {
+            var medico = await _service.GetMedicoById(id);
+            return Ok(medico);
+        }
+        catch (NotFoundException)
+        {
             return NotFound();
-
-        return Ok(MedicoMapper.ToDTO(medico));
+        }
     }
 
     // POST: api/medicos
     [HttpPost]
     public async Task<IActionResult> CreateMedico([FromBody] MedicoCreateDTO dto)
     {
-        var medico = MedicoMapper.ToModel(dto);
-
-        _context.Medicos.Add(medico);
-        await _context.SaveChangesAsync();
-
-        var medicoDTO = MedicoMapper.ToDTO(medico);
-
-        return CreatedAtAction(nameof(GetMedicoById), new { id = medico.Id }, medicoDTO);
+        try
+        {
+            var medico = await _service.CreateMedico(dto);
+            return Created(nameof(GetMedicoById), medico);
+        }
+        catch (ValidationErrorException exception)
+        {
+            return BadRequest(new { mensagem = exception.Message });
+        }
     }
 
     // PATCH: api/medicos/{id}
     [HttpPatch("{id}")]
     public async Task<IActionResult> UpdateMedico(int id, [FromBody] MedicoUpdateDTO dto)
     {
-        var medico = await _context.Medicos.FindAsync(id);
-
-        if (medico == null)
+        try
+        {
+            var medico = await _service.UpdateMedico(id, dto);
+            return Ok(medico);
+        }
+        catch (NotFoundException)
+        {
             return NotFound();
-
-        if (!string.IsNullOrWhiteSpace(dto.Nome))
-        {
-            medico.Nome = dto.Nome;
         }
-
-        if (!string.IsNullOrWhiteSpace(dto.Email))
+        catch (ValidationErrorException exception)
         {
-            medico.Email = dto.Email;
+            return BadRequest(new { mensagem = exception.Message });
         }
-
-        if (!string.IsNullOrWhiteSpace(dto.Telefone))
-        {
-            medico.Telefone = dto.Telefone;
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.CRM))
-        {
-            medico.CRM = dto.CRM;
-        }
-
-        await _context.SaveChangesAsync();
-        
-        var medicoDTO = MedicoMapper.ToDTO(medico);
-        return Ok(medicoDTO);
     }
 
     // DELETE: api/medicos/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMedico(int id)
     {
-        var medico = await _context.Medicos.FindAsync(id);
-
-        if (medico == null)
-            return NotFound();
-
-        var dataAtual = DateTime.Now;
-
-        var possuiConsultas = await _context.Consultas.AnyAsync(consulta => consulta.MedicoId == id && consulta.DataHora > dataAtual);
-        if (possuiConsultas)
+        try
         {
-            return BadRequest(new { mensagem = "O médico possui consultas marcadas, e não pode ser removido." });
+            var medico = await _service.DeleteMedico(id);
+            return Ok(medico);
         }
-
-        _context.Medicos.Remove(medico);
-
-        await _context.SaveChangesAsync();
-
-        var medicoDTO = MedicoMapper.ToDTO(medico);
-        return Ok(medicoDTO);
+        catch (NotFoundException)
+        {
+            return NotFound();
+        }
+        catch (ValidationErrorException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 }

@@ -1,11 +1,12 @@
 using ApiClinica.Models;
 using ApiClinica.DTOs;
+using ApiClinica.Interfaces;
 
 namespace ApiClinica.Mappers;
 
-public static class ConsultaMapper
+public class ConsultaMapper : IConsultaMapper
 {
-    public static Consulta ToModel(ConsultaCreateDTO dto)
+    public Consulta ToModel(ConsultaCreateDTO dto)
     {
         return new Consulta
         {
@@ -15,7 +16,7 @@ public static class ConsultaMapper
         };
     }
 
-    public static ConsultaReadDTO ToDTO(Consulta consulta)
+    public ConsultaReadDTO ToDTO(Consulta consulta)
     {
         return new ConsultaReadDTO
         {

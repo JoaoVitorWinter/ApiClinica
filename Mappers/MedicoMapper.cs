@@ -1,11 +1,12 @@
 using ApiClinica.Models;
 using ApiClinica.DTOs;
+using ApiClinica.Interfaces;
 
 namespace ApiClinica.Mappers;
 
-public static class MedicoMapper
+public class MedicoMapper : IMedicoMapper
 {
-    public static Medico ToModel(MedicoCreateDTO dto)
+    public Medico ToModel(MedicoCreateDTO dto)
     {
         return new Medico
         {
@@ -16,7 +17,7 @@ public static class MedicoMapper
         };
     }
 
-    public static MedicoReadDTO ToDTO(Medico medico)
+    public MedicoReadDTO ToDTO(Medico medico)
     {
         return new MedicoReadDTO
         {
