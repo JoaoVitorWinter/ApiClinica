@@ -33,6 +33,11 @@ public class AuthService: IAuthService
         }
 
         var perfilUsuario = !String.IsNullOrEmpty(dto.Perfil) ? dto.Perfil : "User";
+        if (perfilUsuario != "Admin" && perfilUsuario != "User")
+        {
+            throw new ValidationErrorException("Role inválida para o usuário");
+        }
+
         var existeAdmin = await _context.Usuarios.AnyAsync(u => u.Perfil == "Admin");
 
         if (perfilUsuario == "Admin")

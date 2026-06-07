@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiClinica.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260607115630_InitialCreate")]
+    [Migration("20260607162903_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
