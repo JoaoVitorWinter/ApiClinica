@@ -45,6 +45,21 @@ namespace ApiClinica.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Usuarios",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Login = table.Column<string>(type: "TEXT", nullable: false),
+                    Senha = table.Column<string>(type: "TEXT", nullable: false),
+                    Perfil = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Usuarios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Consultas",
                 columns: table => new
                 {
@@ -87,6 +102,9 @@ namespace ApiClinica.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Consultas");
+
+            migrationBuilder.DropTable(
+                name: "Usuarios");
 
             migrationBuilder.DropTable(
                 name: "Medicos");

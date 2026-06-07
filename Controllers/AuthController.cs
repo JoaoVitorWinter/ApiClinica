@@ -34,7 +34,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            await _service.Register(dto);
+            await _service.Register(dto, User);
             return Ok("Usuário criado com sucesso");
         }
         catch (ValidationErrorException exception)

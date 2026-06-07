@@ -58,6 +58,7 @@ public class PacientesController : ControllerBase
 
     // PATCH: api/pacientes
     [HttpPatch("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdatePaciente(int id, [FromBody] PacienteUpdateDTO dto)
     {
         try
@@ -77,6 +78,7 @@ public class PacientesController : ControllerBase
 
     // DELETE: api/pacientes
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeletePacienteById(int id)
     {
         try

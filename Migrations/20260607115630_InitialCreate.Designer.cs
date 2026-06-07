@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiClinica.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260506230818_InitialCreate")]
+    [Migration("20260607115630_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -99,6 +99,29 @@ namespace ApiClinica.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Pacientes");
+                });
+
+            modelBuilder.Entity("ApiClinica.Models.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Perfil")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("ApiClinica.Models.Consulta", b =>

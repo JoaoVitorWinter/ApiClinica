@@ -22,7 +22,7 @@ public class AuthService: IAuthService
         _configuration = configuration;
     }
 
-    public async Task Register(RegisterDTO dto)
+    public async Task Register(RegisterDTO dto, ClaimsPrincipal currentUser)
     {
         var usuarioExistente = await _context.Usuarios
            .AnyAsync(u => u.Login == dto.Login);
@@ -32,10 +32,24 @@ public class AuthService: IAuthService
             throw new ValidationErrorException("Usuário já registrado com esse nome");
         }
 
+        var perfilUsuario = !String.IsNullOrEmpty(dto.Perfil) ? dto.Perfil : "User";
+        var existeAdmin = await _context.Usuarios.AnyAsync(u => u.Perfil == "Admin");
+
+        if (perfilUsuario == "Admin")
+        {
+            var perfilLogado = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (perfilLogado != "Admin" && existeAdmin)
+            {
+                throw new ValidationErrorException("Somente administradores podem criar usuários admin");
+            }
+        }
+
         var usuario = new Usuario
         {
             Login = dto.Login,
-            Senha = dto.Senha
+            Senha = dto.Senha,
+            Perfil = perfilUsuario
         };
 
         _context.Usuarios.Add(usuario);
@@ -60,7 +74,8 @@ public class AuthService: IAuthService
         // Informações que serão gravadas dentro do token
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, usuario.Login)
+            new Claim(ClaimTypes.Name, usuario.Login),
+            new Claim(ClaimTypes.Role, usuario.Perfil)
         };
 
         // Chave usada para assinar o token

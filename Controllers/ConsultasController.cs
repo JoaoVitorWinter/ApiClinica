@@ -62,6 +62,7 @@ public class ConsultasController : ControllerBase
 
     // PATCH: api/consultas/{id}
     [HttpPatch("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateConsulta(int id, [FromBody] ConsultaUpdateDTO dto)
     {
         try
@@ -81,6 +82,7 @@ public class ConsultasController : ControllerBase
 
     // DELETE: api/consultas/{id}
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConsulta(int id)
     {
         try
