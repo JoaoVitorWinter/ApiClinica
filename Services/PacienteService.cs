@@ -5,12 +5,12 @@ using ApiClinica.Services.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiClinica.Services;
-public class PacientesService : IPacienteService
+public class PacienteService : IPacienteService
 {
     private readonly AppDbContext _context;
     private readonly IPacienteMapper _mapper;
 
-    public PacientesService(AppDbContext context, IPacienteMapper mapper)
+    public PacienteService(AppDbContext context, IPacienteMapper mapper)
     {
         _context = context;
         _mapper = mapper;

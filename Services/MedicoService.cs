@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiClinica.Services
 {
-    public class MedicosService : IMedicoService
+    public class MedicoService : IMedicoService
     {
         private readonly AppDbContext _context;
         private readonly IMedicoMapper _mapper;
 
-        public MedicosService(AppDbContext context, IMedicoMapper mapper)
+        public MedicoService(AppDbContext context, IMedicoMapper mapper)
         {
             _context = context;
             _mapper = mapper;

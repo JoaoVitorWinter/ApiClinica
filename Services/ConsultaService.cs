@@ -7,12 +7,12 @@ using ApiClinica.Services.Exceptions;
 
 namespace ApiClinica.Services
 {
-    public class ConsultasService : IConsultaService
+    public class ConsultaService : IConsultaService
     {
         private readonly AppDbContext _context;
         private readonly IConsultaMapper _mapper;
 
-        public ConsultasService(AppDbContext context, IConsultaMapper mapper)
+        public ConsultaService(AppDbContext context, IConsultaMapper mapper)
         {
             _context = context;
             _mapper = mapper;
