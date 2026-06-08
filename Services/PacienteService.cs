@@ -3,6 +3,7 @@ using ApiClinica.DTOs;
 using ApiClinica.Interfaces;
 using ApiClinica.Services.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace ApiClinica.Services;
 public class PacienteService : IPacienteService
@@ -90,6 +91,17 @@ public class PacienteService : IPacienteService
 
     #endregion
 
+    public static bool ValidarTelefoneBR(string telefone)
+    {
+        if (string.IsNullOrWhiteSpace(telefone)) return false;
+
+        // Expressão Regular para validar números com ou sem máscara (formato 8 ou 9 dígitos)
+        // Aceita formatos como: (XX) XXXX-XXXX ou (XX) 9XXXX-XXXX
+        string padrao = @"^\(?\d{2}\)?\s?(9\d{4}|\d{4})-\d{4}$";
+
+        return Regex.IsMatch(telefone, padrao);
+    }
+
     public async Task<List<PacienteReadDTO>> GetPacientes()
     {
         var pacientes = await _context.Pacientes.ToListAsync();
@@ -129,6 +141,11 @@ public class PacienteService : IPacienteService
             throw new ValidationErrorException("O CPF é inválido");
         }
 
+        if (!ValidarTelefoneBR(dto.Telefone))
+        {
+            throw new ValidationErrorException("Telefone inválido");
+        }
+
         var paciente = _mapper.ToModel(dto);
 
         _context.Pacientes.Add(paciente);
@@ -137,7 +154,6 @@ public class PacienteService : IPacienteService
         var pacienteDTO = _mapper.ToDTO(paciente);
 
         return await GetPacienteById(paciente.Id);
-        //return CreatedAtAction(nameof(GetPacienteById), new { id = paciente.Id }, pacienteDTO);
     }
 
     public async Task<PacienteReadDTO> UpdatePaciente(int id, PacienteUpdateDTO dto)
@@ -171,6 +187,11 @@ public class PacienteService : IPacienteService
 
         if (!string.IsNullOrWhiteSpace(dto.Telefone))
         {
+            if (!ValidarTelefoneBR(dto.Telefone))
+            {
+                throw new ValidationErrorException("Telefone inválido");
+            }
+
             paciente.Telefone = dto.Telefone;
         }
 

@@ -9,6 +9,8 @@ public class PacienteCreateDTO
     [EmailAddress(ErrorMessage = "Email inválido")]
     public required string Email { get; set; }
     [Phone(ErrorMessage = "Telefone inválido")]
+    [RegularExpression(@"^\(?\d{2}\)?\s?(9\d{4}|\d{4})-\d{4}$",
+        ErrorMessage = "Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) 9XXXX-XXXX")]
     public required string Telefone { get; set; }
     public required DateOnly DataNasc { get; set; }
     [RegularExpression(@"^(?:\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2})$",

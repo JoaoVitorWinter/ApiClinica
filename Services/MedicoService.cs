@@ -3,6 +3,7 @@ using ApiClinica.Interfaces;
 using ApiClinica.Services.Exceptions;
 using ApiClinica.DTOs;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace ApiClinica.Services
 {
@@ -15,6 +16,17 @@ namespace ApiClinica.Services
         {
             _context = context;
             _mapper = mapper;
+        }
+
+        public static bool ValidarTelefoneBR(string telefone)
+        {
+            if (string.IsNullOrWhiteSpace(telefone)) return false;
+
+            // Expressão Regular para validar números com ou sem máscara (formato 8 ou 9 dígitos)
+            // Aceita formatos como: (XX) XXXX-XXXX ou (XX) 9XXXX-XXXX
+            string padrao = @"^\(?\d{2}\)?\s?(9\d{4}|\d{4})-\d{4}$";
+
+            return Regex.IsMatch(telefone, padrao);
         }
 
 
@@ -39,6 +51,11 @@ namespace ApiClinica.Services
 
         public async Task<MedicoReadDTO> CreateMedico(MedicoCreateDTO dto)
         {
+            if (!ValidarTelefoneBR(dto.Telefone))
+            {
+                throw new ValidationErrorException("Telefone inválido");
+            }
+
             var medico = _mapper.ToModel(dto);
 
             _context.Medicos.Add(medico);
@@ -68,6 +85,11 @@ namespace ApiClinica.Services
 
             if (!string.IsNullOrWhiteSpace(dto.Telefone))
             {
+                if (!ValidarTelefoneBR(dto.Telefone))
+                {
+                    throw new ValidationErrorException("Telefone inválido");
+                }
+
                 medico.Telefone = dto.Telefone;
             }
 
